@@ -1,0 +1,41 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
+
+  "prettier.semi": true,
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "es5",
+  "prettier.tabWidth": 2,
+  "prettier.printWidth": 100,
+  "prettier.arrowParens": "always",
+  "prettier.endOfLine": "auto",
+
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+
+  "editor.quickSuggestions": {
+    "other": false,
+    "comments": false,
+    "strings": false
+  },
+  "editor.suggestOnTriggerCharacters": false,
+  "editor.inlineSuggest.enabled": false,
+  "editor.parameterHints.enabled": false,
+
+  "eslint.format.enable": true,
+  "eslint.validate": ["javascript", "javascriptreact"],
+
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  "editor.minimap.enabled": false,
+  "editor.wordWrap": "on",
+  "editor.renderWhitespace": "none",
+  "editor.cursorSmoothCaretAnimation": "on"
+}
