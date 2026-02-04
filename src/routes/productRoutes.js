@@ -90,4 +90,71 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const product = await Product.findById(id).lean();
+    if (!product)
+      return res.status(400).json({
+        sucess: false,
+        message: 'Product not found',
+      });
+    let similarProducts = [];
+    if (product.category && product.ecoScore) {
+      similarProducts = await Product.find({
+        _id: { $ne: id },
+        category: product.category,
+        ecoScore: product.ecoScore,
+      })
+        .limit(4)
+        .select('name brand price image ecoScore carborFootprint')
+        .lean();
+
+      if (similarProducts.length < 4) {
+        const additional = await Product.find({
+          _id: {
+            $ne: id,
+            $nin: similarProducts.map((p) => p._id),
+          },
+          category: product.category,
+        })
+          .limit(4 - similarProducts.length)
+          .select('name brand price image ecoScore carbonFootprint')
+          .lean();
+        similarProducts = [...similarProducts, ...additional];
+      }
+    }
+    res.json({
+      success: true,
+      data: {
+        product: {
+          name: product.name,
+          brand: product.brand,
+          price: product.price,
+          image: product.image,
+          ecoScore: product.ecoScore,
+          carbonFootprint: product.carbonFootprint,
+          materials: product.materials || [],
+          category: product.category,
+        },
+        similar: similarProducts.map((p) => ({
+          id: p._id,
+          name: p.name,
+          brand: p.brand,
+          price: p.price,
+          image: p.image,
+          ecoScore: p.ecoScore,
+          carbonFootprint: p.carbonFootprint,
+        })),
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: err.message,
+    });
+  }
+});
+
 export default router;

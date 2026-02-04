@@ -44,7 +44,7 @@ const productSchema = new mongoose.Schema(
     },
 
     // Eco Score Grade
-    ecoScoreGrade: {
+    ecoScore: {
       type: String,
       enum: ['A+', 'A', 'B', 'C', 'D', 'F'],
       required: true,
