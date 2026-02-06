@@ -46,7 +46,7 @@ function Hero() {
         </div>
         <div className="flex mt-3 gap-7">
           {stats.map((item) => (
-            <div className="text-center">
+            <div key={item.label} className="text-center">
               <div className="font-serif text-3xl font-semibold">
                 {item.value}
               </div>

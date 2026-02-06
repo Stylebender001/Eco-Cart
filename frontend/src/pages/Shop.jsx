@@ -1,209 +1,114 @@
+import { useState, useEffect } from 'react';
 import Footer from "../components/home/Footer";
 import Navbar from "../components/home/Navbar";
 import ProductCard from "../components/home/ProductCard";
 import Filters from "../components/shop/Filters";
+import api from '../api/axios.js';
 
 function Shop() {
-  const allProducts = [
-    {
-      id: 1,
-      name: "Organic Cotton T-Shirt",
-      brand: "EcoWear",
-      price: 34.99,
-      image:
-        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-      ecoScore: "A+",
-      carbonFootprint: "2.1kg CO₂",
-      materials: ["Organic Cotton", "Plant Dyes", "Recycled"],
-      badges: ["Fair Trade"],
-      category: "Clothing",
-    },
-    {
-      id: 2,
-      name: "Bamboo Water Bottle",
-      brand: "GreenLife",
-      price: 24.99,
-      image:
-        "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop",
-      ecoScore: "A",
-      carbonFootprint: "0.8kg CO₂",
-      materials: ["Bamboo", "Stainless Steel", "BPA Free"],
-      badges: ["Plastic Free"],
-      category: "Home & Kitchen",
-    },
-    {
-      id: 3,
-      name: "Recycled Yoga Mat",
-      brand: "ZenEarth",
-      price: 49.99,
-      image:
-        "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400&h=400&fit=crop",
-      ecoScore: "A+",
-      carbonFootprint: "1.5kg CO₂",
-      materials: ["Recycled Rubber", "Cork", "Natural Latex"],
-      badges: ["Zero Waste"],
-      category: "Sports & Outdoors",
-    },
-    {
-      id: 4,
-      name: "Hemp Canvas Backpack",
-      brand: "NaturePack",
-      price: 79.99,
-      image:
-        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
-      ecoScore: "A",
-      carbonFootprint: "3.2kg CO₂",
-      materials: ["Hemp", "Organic Cotton", "Recycled Metal"],
-      badges: ["Vegan"],
-      category: "Bags & Accessories",
-    },
-    {
-      id: 5,
-      name: "Beeswax Food Wraps",
-      brand: "BeeGreen",
-      price: 18.99,
-      image:
-        "https://images.unsplash.com/photo-1611486212557-88be5ff6f941?w=400&h=400&fit=crop",
-      ecoScore: "A+",
-      carbonFootprint: "0.3kg CO₂",
-      materials: ["Organic Cotton", "Beeswax", "Jojoba Oil"],
-      badges: ["Plastic Free", "Compostable"],
-      category: "Home & Kitchen",
-    },
-    {
-      id: 6,
-      name: "Bamboo Cutlery Set",
-      brand: "EcoEats",
-      price: 14.99,
-      image:
-        "https://images.unsplash.com/photo-1584346133934-a3afd2a33c4c?w=400&h=400&fit=crop",
-      ecoScore: "A+",
-      carbonFootprint: "0.4kg CO₂",
-      materials: ["Bamboo", "Organic Cotton Pouch"],
-      badges: ["Zero Waste"],
-      category: "Home & Kitchen",
-    },
-    {
-      id: 7,
-      name: "Solar Power Bank",
-      brand: "SunCharge",
-      price: 59.99,
-      image:
-        "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400&h=400&fit=crop",
-      ecoScore: "B",
-      carbonFootprint: "5.1kg CO₂",
-      materials: ["Recycled Plastic", "Solar Cells"],
-      badges: ["Renewable Energy"],
-      category: "Electronics",
-    },
-    {
-      id: 8,
-      name: "Natural Shampoo Bar",
-      brand: "PureNature",
-      price: 12.99,
-      image:
-        "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&h=400&fit=crop",
-      ecoScore: "A+",
-      carbonFootprint: "0.2kg CO₂",
-      materials: ["Organic Oils", "Essential Oils", "No Plastic"],
-      badges: ["Plastic Free", "Vegan"],
-      category: "Beauty & Personal Care",
-    },
-    {
-      id: 9,
-      name: "Recycled Denim Jacket",
-      brand: "ReThread",
-      price: 89.99,
-      image:
-        "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&h=400&fit=crop",
-      ecoScore: "A",
-      carbonFootprint: "4.2kg CO₂",
-      materials: ["Recycled Denim", "Organic Cotton"],
-      badges: ["Upcycled"],
-      category: "Clothing",
-    },
-    {
-      id: 10,
-      name: "Reusable Produce Bags",
-      brand: "GreenMesh",
-      price: 16.99,
-      image:
-        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop",
-      ecoScore: "A+",
-      carbonFootprint: "0.5kg CO₂",
-      materials: ["Organic Cotton Mesh", "Recycled Labels"],
-      badges: ["Zero Waste", "Plastic Free"],
-      category: "Home & Kitchen",
-    },
-    {
-      id: 11,
-      name: "Coconut Bowl Set",
-      brand: "IslandCraft",
-      price: 29.99,
-      image:
-        "https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=400&fit=crop",
-      ecoScore: "A+",
-      carbonFootprint: "0.6kg CO₂",
-      materials: ["Reclaimed Coconut Shells", "Coconut Oil Polish"],
-      badges: ["Handcrafted", "Upcycled"],
-      category: "Home & Kitchen",
-    },
-    {
-      id: 12,
-      name: "Organic Linen Dress",
-      brand: "NaturalThreads",
-      price: 74.99,
-      image:
-        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=400&fit=crop",
-      ecoScore: "A",
-      carbonFootprint: "2.8kg CO₂",
-      materials: ["Organic Linen", "Natural Dyes"],
-      badges: ["Fair Trade", "Vegan"],
-      category: "Clothing",
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  // Multiple filters state
+  const [filters, setFilters] = useState({
+    category: 'All Categories',
+    ecoScore: '',
+    sortBy: 'featured'
+  });
 
-  // const filteredProducts = useMemo(() => {
-  //   let result = [...allProducts];
+  // Fetch products from backend
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const params = {};
+      
+      // Category filter
+      if (filters.category !== 'All Categories') {
+        params.category = filters.category;
+      }
+      
+      // Eco score filter
+      if (filters.ecoScore) {
+        params.ecoScore = filters.ecoScore;
+      }
+      
+      // Sort
+      if (filters.sortBy !== 'featured') {
+        params.sort = filters.sortBy;
+      }
+      
+      console.log('Fetching products with params:', params);
+      const response = await api.get('/products', { params });
+      
+      if (response.data.success) {
+        setProducts(response.data.products || response.data.data || []);
+      } else {
+        setError('Failed to load products');
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError('Unable to load products. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  //   // Category filter
-  //   if (selectedCategory !== "All Categories") {
-  //     result = result.filter((p) => p.category === selectedCategory);
-  //   }
+  // Fetch categories from backend
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/products/categories/all');
+      if (response.data.success) {
+        setCategories(response.data.categories || []);
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    }
+  };
 
-  //   // Eco score filter
-  //   if (selectedEcoScores.length > 0) {
-  //     result = result.filter((p) => selectedEcoScores.includes(p.ecoScore));
-  //   }
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, [filters]); // Re-fetch when filters change
 
-  //   // Price filter
-  //   result = result.filter(
-  //     (p) => p.price >= priceRange[0] && p.price <= priceRange[1],
-  //   );
+  // Update filter function
+  const updateFilter = (filterName, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+  };
 
-  //   // Sorting
-  //   switch (sortBy) {
-  //     case "price-low":
-  //       result.sort((a, b) => a.price - b.price);
-  //       break;
-  //     case "price-high":
-  //       result.sort((a, b) => b.price - a.price);
-  //       break;
-  //     case "eco-score":
-  //       const scoreOrder = { "A+": 0, A: 1, B: 2, C: 3 };
-  //       result.sort((a, b) => scoreOrder[a.ecoScore] - scoreOrder[b.ecoScore]);
-  //       break;
-  //     default:
-  //       break;
-  //   }
+  // Handle search from navbar if needed
+  const handleSearch = (searchTerm) => {
+    console.log('Search:', searchTerm);
+  };
 
-  //   return result;
-  // }, [selectedCategory, selectedEcoScores, priceRange, sortBy]);
+  // Format products for display
+  const formattedProducts = products.map(product => ({
+    id: product._id || product.id,
+    name: product.name,
+    brand: product.brand,
+    price: product.price,
+    image: product.image 
+      ? `http://localhost:3000${product.image}` 
+      : "http://localhost:3000/uploads/products/default.jpg",
+    ecoScore: product.ecoScore || 'C',
+    carbonFootprint: product.carbonFootprint || 0,
+    materials: product.materials || [],
+    category: product.category,
+    stock: product.stock,
+    description: product.description
+  }));
 
   return (
-    <div className="bg-orange-50/50">
-      <Navbar />
-      <section className="py-10 ">
+    <div className="bg-orange-50/50 min-h-screen">
+      <Navbar onSearch={handleSearch} />
+      
+      <section className="py-10 px-4 md:px-8">
         <div className="text-center mb-8">
           <h1 className="font-serif text-5xl font-semibold mb-3">
             Shop Sustainable
@@ -212,32 +117,95 @@ function Shop() {
             Discover eco-friendly products that make a positive impact on our
             planet. Every purchase helps reduce your carbon footprint.
           </p>
-          {/* <div>
-            <input
-            placeholder="Search..."
-            className="px-4 py-2 border w-150 rounded-xl focus:outline-3 focus:placeholder:text-green-700 focus:outline-green-700 focus:border-none "
-            />
-          </div> */}
         </div>
-        <div className="flex gap-10 justify-center ">
-          <Filters />
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <div>{allProducts.length} products</div>
-              <select className="border py-2 flex justify-center items-center px-2 cursor-pointer rounded-xl">
-                <option>Featured</option>
-                <option>Price: High to Low</option>
-                <option>Price: Low to High</option>
-              </select>
+
+        {/* Loading state */}
+        {loading && (
+          <div className="text-center py-10">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <p className="mt-2 text-gray-600">Loading products...</p>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && !loading && (
+          <div className="text-center py-10">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={fetchProducts}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Success state */}
+        {!loading && !error && (
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Filters sidebar */}
+            <div className="lg:w-1/4">
+              <Filters 
+                selectedCategory={filters.category}
+                selectedEcoScore={filters.ecoScore}
+                onCategoryChange={(cat) => updateFilter('category', cat)}
+                onEcoScoreChange={(score) => updateFilter('ecoScore', score)}
+                categories={categories}
+              />
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              {allProducts.map((item, index) => (
-                <ProductCard product={item} key={index} />
-              ))}
+
+            {/* Products grid */}
+            <div className="lg:w-3/4">
+              <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+                <div className="text-gray-600 mb-4 md:mb-0">
+                  {formattedProducts.length} {formattedProducts.length === 1 ? 'product' : 'products'} found
+                  {(filters.category !== 'All Categories' || filters.ecoScore) && (
+                    <span className="ml-2 text-sm text-green-600">
+                      (filtered)
+                    </span>
+                  )}
+                </div>
+                <select 
+                  value={filters.sortBy}
+                  onChange={(e) => updateFilter('sortBy', e.target.value)}
+                  className="border py-2 px-4 cursor-pointer rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="newest">Newest First</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                  <option value="ecoScore">Best Eco Score</option>
+                </select>
+              </div>
+
+              {formattedProducts.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-gray-600">No products found with current filters.</p>
+                  <button
+                    onClick={() => {
+                      updateFilter('category', 'All Categories');
+                      updateFilter('ecoScore', '');
+                    }}
+                    className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {formattedProducts.map((product) => (
+                    <ProductCard 
+                      product={product} 
+                      key={product.id} 
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </section>
+      
       <Footer />
     </div>
   );
