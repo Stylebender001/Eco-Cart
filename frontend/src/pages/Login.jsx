@@ -50,7 +50,7 @@ function Login() {
   const { email } = formData;
 
   // 🔥 TEMP ADMIN LOGIN (for testing only)
-  if (email === "admin@example.com") {
+  if (email === "admin@ecocart.com") {
     const adminUser = {
       id: 1,
       email: "admin@ecocart.com",
