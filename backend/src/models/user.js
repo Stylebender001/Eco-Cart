@@ -1,11 +1,16 @@
-import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  username: {
+  firstName: {
     type: String,
     required: true,
   },
+  lastName: {
+    type: String,
+    required: true,
+  },
+
   email: {
     type: String,
     required: true,
@@ -18,20 +23,26 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['customer', 'admin'],
-    required: true,
+    enum: ["customer", "admin"],
+    default: "customer",
   },
 });
 
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
-    { _id: this._id, username: this.usernamename, email: this.email },
+    {
+      _id: this._id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      role: this.role,
+    },
     // eslint-disable-next-line no-undef
     process.env.JWT_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: "1h" },
   );
   return token;
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 export default User;

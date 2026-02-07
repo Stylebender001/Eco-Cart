@@ -1,158 +1,174 @@
-import express from 'express';
-import Product from '../models/product.js';
+import express from "express";
+import Product from "../models/product.js";
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+//Get all products with pagination, search, and filters
+router.get("/", async (req, res) => {
   try {
     const {
       category,
-      grade,
-      minPrice,
-      maxPrice,
       search,
       page = 1,
       limit = 12,
-      sort = 'grade',
+      ecoScore,
+      sort = "featured",
     } = req.query;
 
-    let query = {};
+    // Build query
+    let query = { inStock: true };
 
-    // Filters
-    if (category) query.category = category;
-    if (grade) query.ecoScoreGrade = grade;
+    // Filter by category
+    if (category && category !== "all" && category !== "All Categories") {
+      query.category = category;
+    }
 
-    // Price range
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
+    // Filter by ecoScore
+    if (ecoScore && ecoScore !== "") {
+      query.ecoScore = ecoScore;
     }
 
     // Search
-    const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
     if (search) {
-      const safeSearch = escapeRegex(search);
-
-      query.$or = [
-        { name: { $regex: safeSearch, $options: 'i' } },
-        { brand: { $regex: safeSearch, $options: 'i' } },
-        { description: { $regex: safeSearch, $options: 'i' } },
-      ];
+      query.name = { $regex: search, $options: "i" };
     }
 
-    const skip = (page - 1) * limit;
+    // Pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
 
-    // Sort logic
-    let sortOrder = {};
+    // Determine sort order
+    let sortOption = {};
     switch (sort) {
-      case 'price_asc':
-        sortOrder = { price: 1 };
+      case "newest":
+        sortOption = { createdAt: -1 };
         break;
-      case 'price_desc':
-        sortOrder = { price: -1 };
+      case "price_asc":
+        sortOption = { price: 1 };
         break;
-      case 'carbon_asc':
-        sortOrder = { carbonFootprint: 1 };
+      case "price_desc":
+        sortOption = { price: -1 };
         break;
-      case 'newest':
-        sortOrder = { createdAt: -1 };
+      case "ecoScore":
+        sortOption = { ecoScoreNumeric: 1 }; // Use numeric score (1 = A+)
         break;
-      default: // grade (A+ first)
-        sortOrder = { ecoScoreGrade: 1 };
+      case "featured":
+      default:
+        sortOption = { createdAt: -1 }; // Default: newest first
     }
 
-    // Get products with raw data
+    console.log("Sorting by:", sort, "with option:", sortOption);
+
+    // Get products
     const products = await Product.find(query)
       .skip(skip)
-      .limit(Number(limit))
-      .sort(sortOrder)
-      .select('-__v');
+      .limit(limitNum)
+      .sort(sortOption)
+      .select(
+        "name brand price image category ecoScore carbonFootprint stock description materials createdAt",
+      );
 
+    // Get total count
     const total = await Product.countDocuments(query);
 
-    // Return pure raw data
+    // Format products
+    const formattedProducts = products.map((product) => ({
+      id: product._id,
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      category: product.category,
+      ecoScore: product.ecoScore,
+      carbonFootprint: product.carbonFootprint,
+      image: product.image,
+      stock: product.stock,
+      description: product.description,
+      materials: product.materials,
+    }));
+
     res.json({
       success: true,
-      count: products.length,
+      products: formattedProducts,
       total,
-      page: Number(page),
-      totalPages: Math.ceil(total / limit),
-      data: products,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
     });
   } catch (error) {
+    console.error("Error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error',
-      error: error.message,
+      message: "Something went wrong",
+    });
+  }
+});
+// GET single product (Simplified)
+router.get("/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // Get 4 similar products (same category)
+    const similarProducts = await Product.find({
+      _id: { $ne: product._id },
+      category: product.category,
+      inStock: true,
+    })
+      .limit(4)
+      .select("name brand price image ecoScore");
+
+    // Simple response
+    res.json({
+      success: true,
+      product: {
+        id: product._id,
+        name: product.name,
+        brand: product.brand,
+        price: product.price,
+        description: product.description,
+        category: product.category,
+        ecoScore: product.ecoScore,
+        carbonFootprint: product.carbonFootprint,
+        materials: product.materials,
+        image: product.image,
+        stock: product.stock,
+      },
+      similarProducts: similarProducts.map((p) => ({
+        id: p._id,
+        name: p.name,
+        brand: p.brand,
+        price: p.price,
+        image: p.image,
+        ecoScore: p.ecoScore,
+      })),
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
     });
   }
 });
 
-router.get('/:id', async (req, res) => {
+// GET product categories (for filters)
+router.get("/categories/all", async (req, res) => {
   try {
-    const id = req.params.id;
-    const product = await Product.findById(id).lean();
-    if (!product)
-      return res.status(400).json({
-        sucess: false,
-        message: 'Product not found',
-      });
-    let similarProducts = [];
-    if (product.category && product.ecoScore) {
-      similarProducts = await Product.find({
-        _id: { $ne: id },
-        category: product.category,
-        ecoScore: product.ecoScore,
-      })
-        .limit(4)
-        .select('name brand price image ecoScore carborFootprint')
-        .lean();
-
-      if (similarProducts.length < 4) {
-        const additional = await Product.find({
-          _id: {
-            $ne: id,
-            $nin: similarProducts.map((p) => p._id),
-          },
-          category: product.category,
-        })
-          .limit(4 - similarProducts.length)
-          .select('name brand price image ecoScore carbonFootprint')
-          .lean();
-        similarProducts = [...similarProducts, ...additional];
-      }
-    }
+    const categories = await Product.distinct("category");
     res.json({
       success: true,
-      data: {
-        product: {
-          name: product.name,
-          brand: product.brand,
-          price: product.price,
-          image: product.image,
-          ecoScore: product.ecoScore,
-          carbonFootprint: product.carbonFootprint,
-          materials: product.materials || [],
-          category: product.category,
-        },
-        similar: similarProducts.map((p) => ({
-          id: p._id,
-          name: p.name,
-          brand: p.brand,
-          price: p.price,
-          image: p.image,
-          ecoScore: p.ecoScore,
-          carbonFootprint: p.carbonFootprint,
-        })),
-      },
+      categories,
     });
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Server Error',
-      error: err.message,
+      message: "Failed to get categories",
     });
   }
 });

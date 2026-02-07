@@ -1,27 +1,67 @@
-import bcrypt from 'bcrypt';
-import express from 'express';
-import Users from '../models/user.js';
+import bcrypt from "bcrypt";
+import express from "express";
+import Users from "../models/user.js";
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    let user = await Users.findOne({ email: req.body.email });
-    if (user) return res.status(400).send('User already exists');
-    user = new Users({
-      username: req.body.username,
-      email: req.body.email,
-      password: req.body.password,
-    });
+    const { firstName, lastName, email, password, confirmPassword } = req.body;
+
+    // 1. Check if passwords match
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
+    // 2. Check if user already exists
+    const existingUser = await Users.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered",
+      });
+    }
+
+    // 3. Hash password
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
-    user = await user.save();
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 4. Create user
+    const user = new Users({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role: "customer",
+    });
+
+    await user.save();
+
+    // 5. Generate token
     const token = user.generateAuthToken();
-    const { _id, username, email } = user;
-    res.header('x-auth-token', token).send({ _id, username, email });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+
+    // 6. Return response
+    res.status(201).json({
+      success: true,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        token: token,
+      },
+      message: "Registration successful",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 });
 
