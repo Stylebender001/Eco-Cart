@@ -37,7 +37,6 @@ userSchema.methods.generateAuthToken = function () {
       email: this.email,
       role: this.role,
     },
-    // eslint-disable-next-line no-undef
     process.env.JWT_SECRET,
     { expiresIn: "1h" },
   );
