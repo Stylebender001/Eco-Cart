@@ -9,6 +9,7 @@ import { placeOrder } from "../services/orderServices.js";
 
 function CheckoutPage() {
   const { cart, totalPrice, clearCart } = useCart();
+  const [order, setOrder] = useState();
   const [orderComplete, setOrderComplete] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,6 +28,7 @@ function CheckoutPage() {
       }
 
       const order = await placeOrder(cart, token);
+      setOrder(order);
 
       alert("Order placed successfully!");
 

@@ -8,6 +8,7 @@ import register from "../src/routes/register.js";
 import adminDashboard from "../src/routes/adminDashboard.js";
 import orderRoute from "../src/routes/orderRoute.js";
 import authMiddleware from "../middleware/auth.js";
+import userRoute from "../src/routes/userRoute.js";
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -39,4 +40,5 @@ export default function (app) {
   app.use("/api/login", login);
   app.use("/api/admin", adminDashboard);
   app.use("/api/order", authMiddleware, orderRoute);
+  app.use("/api/user", userRoute);
 }
