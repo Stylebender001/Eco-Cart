@@ -41,7 +41,7 @@ router.post("/", async (req, res) => {
     await user.save();
 
     // 5. Generate token
-    const token = user.generateAuthToken();
+    // const token = user.generateAuthToken();
 
     // 6. Return response
     res.status(201).json({
@@ -52,7 +52,7 @@ router.post("/", async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
-        token: token,
+        // token: token,
       },
       message: "Registration successful",
     });

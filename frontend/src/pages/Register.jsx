@@ -43,14 +43,14 @@ function Register() {
     setSuccess("");
 
     try {
-      await api.post("/register", formData);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      localStorage.setItem("token", response.data.user.token);
-      window.dispatchEvent(
-        new CustomEvent("user-logged-in", {
-          detail: response.data.user,
-        }),
-      );
+      const response = await api.post("/register", formData);
+      // localStorage.setItem("user", JSON.stringify(response.data.user));
+      // localStorage.setItem("token", response.data.user.token);
+      // window.dispatchEvent(
+      //   new CustomEvent("user-logged-in", {
+      //     detail: response.data.user,
+      //   }),
+      // );
       alert("Registration Successful. You can login now.");
       navigate("/login");
     } catch (err) {
