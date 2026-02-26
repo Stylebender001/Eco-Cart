@@ -7,7 +7,7 @@ function Navbar() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const { totalItems } = useCart();
-  
+
   const navLinks = [
     { id: 1, name: "Shop", href: "/shop" },
     { id: 2, name: "About", href: "/about" },
@@ -18,16 +18,16 @@ function Navbar() {
   // Function to check auth status
   useEffect(() => {
     const checkAuth = () => {
-      const storedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
-      
+      const storedUser = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+
       if (storedUser && token) {
         try {
           setUser(JSON.parse(storedUser));
         } catch (error) {
-          console.error('Error parsing user:', error);
-          localStorage.removeItem('user');
-          localStorage.removeItem('token');
+          console.error("Error parsing user:", error);
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
           setUser(null);
         }
       } else {
@@ -36,23 +36,23 @@ function Navbar() {
     };
 
     checkAuth();
-    
+
     const handleLoginEvent = () => {
       checkAuth();
     };
-    
-    window.addEventListener('user-logged-in', handleLoginEvent);
-    
+
+    window.addEventListener("user-logged-in", handleLoginEvent);
+
     return () => {
-      window.removeEventListener('user-logged-in', handleLoginEvent);
+      window.removeEventListener("user-logged-in", handleLoginEvent);
     };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -62,14 +62,16 @@ function Navbar() {
         <div className="flex items-center justify-center w-10 h-10 bg-green-700 rounded-full">
           <Leaf className="text-white w-6 h-6" />
         </div>
-        <span className="font-serif text-xl font-semibold text-gray-900">EcoCart</span>
+        <span className="font-serif text-xl font-semibold text-gray-900">
+          EcoCart
+        </span>
       </Link>
 
       {/* Navigation Links - CENTER */}
       <div className="flex items-center justify-center gap-8">
         {navLinks.map((item) => (
-          <Link 
-            to={item.href} 
+          <Link
+            to={item.href}
             key={item.id}
             className="text-gray-700 hover:text-green-800 transition-colors"
           >
@@ -99,12 +101,15 @@ function Navbar() {
             {/* User Profile */}
             <div className="relative group">
               <div className="flex items-center gap-2 p-2-50 rounded-md transition-colors">
-                <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                <Link
+                  to={"/profile"}
+                  className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full"
+                >
                   <User className="w-4 h-4 text-green-700" />
-                </div>
+                </Link>
                 <span className="flex items-center gap-2 text-sm font-medium">
-                  {user.firstName || user.email?.split('@')[0]}
-                    <button
+                  {user.firstName || user.email?.split("@")[0]}
+                  <button
                     onClick={handleLogout}
                     className="flex items-center w-full gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
